@@ -1,25 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <title>My Portfolio</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Modern Portfolio</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="script.js"></script>
 </head>
+
 <body>
-    <header>
-        <h1>Welcome to My Portfolio</h1>
-        <p>I'm a developer specializing in [your skills].</p>
-    </header>
-    <section id="projects">
-        <h2>Projects</h2>
-        <div class="project">
-            <h3>Project 1</h3>
-            <p>Description of your project.</p>
-            <a href="https://github.com/yourusername/project-repo">View on GitHub</a>
+  <header>
+    <nav>
+      <div class="logo">My Portfolio</div>
+      <ul>
+        <li><a href="#about">About</a></li>
+        <li><a href="#projects">Projects</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <section id="about">
+    <div class="container">
+      <h1>About Me</h1>
+      <img src="images/profile.jpg" alt="Profile Picture" class="profile-img">
+      <p>I'm a developer passionate about [your skills]. I love creating modern web experiences.</p>
+    </div>
+  </section>
+
+  <section id="projects">
+    <div class="container">
+      <h1>My Projects</h1>
+      <div class="project-grid">
+        <div class="project-card" data-description="A web app for task management.">
+          <img src="images/project1.jpg" alt="Project 1">
+          <h3>Project 1</h3>
+          <button class="view-btn">View Details</button>
         </div>
-    </section>
-    <footer>
-        <p>Contact: your.email@example.com</p>
-    </footer>
+        <div class="project-card" data-description="An e-commerce site with responsive design.">
+          <img src="images/project2.jpg" alt="Project 2">
+          <h3>Project 2</h3>
+          <button class="view-btn">View Details</button>
+        </div>
+        <!-- Add more project cards as needed -->
+      </div>
+    </div>
+  </section>
+
+  <section id="contact">
+    <div class="container">
+      <h1>Contact Me</h1>
+      <form id="contact-form">
+        <input type="text" placeholder="Your Name" required>
+        <input type="email" placeholder="Your Email" required>
+        <textarea placeholder="Your Message" required></textarea>
+        <button type="submit">Send</button>
+      </form>
+    </div>
+  </section>
+
+  <footer>
+    <p>&copy; 2023 My Portfolio. All rights reserved.</p>
+  </footer>
+
+  <!-- Modal for project details -->
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Project Details</h2>
+      <p id="modal-description"></p>
+    </div>
+  </div>
 </body>
+
 </html>
