@@ -1,39 +1,50 @@
-$(document).ready(function() {
-    // Smooth scrolling for navigation links
-    $('nav a').on('click', function(event) {
-        event.preventDefault();
-        var target = $(this).attr('href');
-        $('html, body').animate({
-            scrollTop: $(target).offset().top - 50
-        }, 800);
-    });
+const scene = new THREE.Scene();
 
-    // Mobile menu toggle (if needed, add a hamburger button in HTML)
-    // $('.hamburger').on('click', function() {
-    //     $('nav ul').toggleClass('show');
-    // });
+const camera = new THREE.PerspectiveCamera(
+  75,
+  window.innerWidth / window.innerHeight,
+  0.1,
+  1000
+);
 
-    // Modal for project details
-    $('.view-btn').on('click', function() {
-        var description = $(this).closest('.project-card').data('description');
-        $('#modal-description').text(description);
-        $('#modal').fadeIn();
-    });
+const renderer = new THREE.WebGLRenderer({
+  canvas: document.querySelector("#bg"),
+  alpha: true
+});
 
-    $('.close').on('click', function() {
-        $('#modal').fadeOut();
-    });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(window.devicePixelRatio);
 
-    $(window).on('click', function(event) {
-        if (event.target == $('#modal')[0]) {
-            $('#modal').fadeOut();
-        }
-    });
+camera.position.z = 30;
 
-    // Basic form submission (replace with real backend if needed)
-    $('#contact-form').on('submit', function(event) {
-        event.preventDefault();
-        alert('Thank you for your message! (Form not connected to backend yet.)');
-        $(this).trigger('reset');
-    });
+// Geometry
+const geometry = new THREE.TorusGeometry(10, 3, 16, 100);
+const material = new THREE.MeshStandardMaterial({
+  color: 0x00f6ff,
+  wireframe: true
+});
+
+const torus = new THREE.Mesh(geometry, material);
+scene.add(torus);
+
+// Lighting
+const pointLight = new THREE.PointLight(0xffffff);
+pointLight.position.set(20, 20, 20);
+scene.add(pointLight);
+
+// Animation
+function animate() {
+  requestAnimationFrame(animate);
+  torus.rotation.x += 0.005;
+  torus.rotation.y += 0.003;
+  renderer.render(scene, camera);
+}
+
+animate();
+
+// Resize
+window.addEventListener("resize", () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
 });

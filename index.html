@@ -1,78 +1,61 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Modern Portfolio</title>
-  <link rel="stylesheet" href="styles.css">
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="script.js"></script>
+  <meta charset="UTF-8" />
+  <title>Web Developer Portfolio</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
-  <header>
-    <nav>
-      <div class="logo">My Portfolio</div>
-      <ul>
-        <li><a href="#about">About</a></li>
-        <li><a href="#projects">Projects</a></li>
-        <li><a href="#contact">Contact</a></li>
-      </ul>
-    </nav>
+
+  <!-- 3D Background -->
+  <canvas id="bg"></canvas>
+
+  <!-- Main Content -->
+  <header class="hero">
+    <h1>Hi, I'm <span>Alex</span></h1>
+    <p>Creative Web Developer & UI Designer</p>
+    <a href="#projects" class="btn">View My Work</a>
   </header>
 
-  <section id="about">
-    <div class="container">
-      <h1>About Me</h1>
-      <img src="images/profile.jpg" alt="Profile Picture" class="profile-img">
-      <p>I'm a developer passionate about [your skills]. I love creating modern web experiences.</p>
+  <section class="about">
+    <h2>About Me</h2>
+    <p>
+      I build modern, fast, and interactive web experiences using
+      cutting-edge technologies with a focus on usability and design.
+    </p>
+  </section>
+
+  <section class="skills">
+    <h2>Skills</h2>
+    <div class="skill-grid">
+      <span>HTML</span>
+      <span>CSS</span>
+      <span>JavaScript</span>
+      <span>Three.js</span>
+      <span>React</span>
+      <span>UI/UX</span>
     </div>
   </section>
 
-  <section id="projects">
-    <div class="container">
-      <h1>My Projects</h1>
-      <div class="project-grid">
-        <div class="project-card" data-description="A web app for task management.">
-          <img src="images/project1.jpg" alt="Project 1">
-          <h3>Project 1</h3>
-          <button class="view-btn">View Details</button>
-        </div>
-        <div class="project-card" data-description="An e-commerce site with responsive design.">
-          <img src="images/project2.jpg" alt="Project 2">
-          <h3>Project 2</h3>
-          <button class="view-btn">View Details</button>
-        </div>
-        <!-- Add more project cards as needed -->
-      </div>
+  <section id="projects" class="projects">
+    <h2>Projects</h2>
+    <div class="project-card">
+      <h3>3D Landing Page</h3>
+      <p>Interactive website with WebGL animations.</p>
+    </div>
+    <div class="project-card">
+      <h3>Portfolio Website</h3>
+      <p>Minimal and responsive personal brand site.</p>
     </div>
   </section>
 
-  <section id="contact">
-    <div class="container">
-      <h1>Contact Me</h1>
-      <form id="contact-form">
-        <input type="text" placeholder="Your Name" required>
-        <input type="email" placeholder="Your Email" required>
-        <textarea placeholder="Your Message" required></textarea>
-        <button type="submit">Send</button>
-      </form>
-    </div>
+  <section class="contact">
+    <h2>Contact</h2>
+    <p>Email: alex.dev@email.com</p>
   </section>
 
-  <footer>
-    <p>&copy; 2023 My Portfolio. All rights reserved.</p>
-  </footer>
-
-  <!-- Modal for project details -->
-  <div id="modal" class="modal">
-    <div class="modal-content">
-      <span class="close">&times;</span>
-      <h2>Project Details</h2>
-      <p id="modal-description"></p>
-    </div>
-  </div>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+  <script src="script.js"></script>
 </body>
-
 </html>
