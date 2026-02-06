@@ -1,61 +1,136 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <title>Web Developer Portfolio</title>
+  <title>Matrix Developer Portfolio</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-  <!-- 3D Background -->
   <canvas id="bg"></canvas>
 
-  <!-- Main Content -->
   <header class="hero">
     <h1>Hi, I'm <span id="typewriter"></span></h1>
-    <p>Creative Web Developer & UI Designer</p>
+    <p>Web Developer & Creative Coder</p>
     <a href="#projects" class="btn">View My Work</a>
   </header>
 
-  <section class="about">
+  <section>
     <h2>About Me</h2>
-    <p>
-      I build modern, fast, and interactive web experiences using
-      cutting-edge technologies with a focus on usability and design.
-    </p>
+    <p>I build modern, interactive web experiences with a strong focus on performance, design, and usability.</p>
   </section>
 
-  <section class="skills">
+  <section>
     <h2>Skills</h2>
     <div class="skill-grid">
-      <span>HTML</span>
-      <span>CSS</span>
-      <span>JavaScript</span>
-      <span>Three.js</span>
-      <span>React</span>
-      <span>UI/UX</span>
+      <span>HTML</span><span>CSS</span><span>JavaScript</span><span>Three.js</span><span>React</span><span>UI /
+        UX</span>
     </div>
   </section>
 
-  <section id="projects" class="projects">
+  <section id="projects">
     <h2>Projects</h2>
-    <div class="project-card">
-      <h3>3D Landing Page</h3>
-      <p>Interactive website with WebGL animations.</p>
-    </div>
-    <div class="project-card">
-      <h3>Portfolio Website</h3>
-      <p>Minimal and responsive personal brand site.</p>
+    <div class="projects">
+      <div class="project-card">
+        <h3>Matrix Portfolio</h3>
+        <p>3D animated developer portfolio with WebGL.</p>
+      </div>
+      <div class="project-card">
+        <h3>Landing Page</h3>
+        <p>Modern responsive landing page design.</p>
+      </div>
     </div>
   </section>
 
   <section class="contact">
     <h2>Contact</h2>
-    <p>Email: alex.dev@email.com</p>
+    <p>Email: ortiz.jhonrhyb@gmail.com</p>
   </section>
 
-  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
-  <script src="script.js"></script>
+  <!-- ES Module Script for Three.js -->
+  <script type="module">
+    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.module.js';
+
+    // === Canvas + Scene + Camera ===
+    const canvas = document.getElementById('bg');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x000000);
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.z = 50;
+
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+
+    // === Matrix Particles ===
+    const particleCount = 2000;
+    const geometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(particleCount * 3);
+    for (let i = 0; i < particleCount * 3; i += 3) {
+      positions[i] = (Math.random() - 0.5) * 300;
+      positions[i + 1] = (Math.random() - 0.5) * 200;
+      positions[i + 2] = Math.random() * -400;
+    }
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+    const material = new THREE.PointsMaterial({ color: 0x00ffdd, size: 1.2 });
+    const particles = new THREE.Points(geometry, material);
+    scene.add(particles);
+
+    // === Mouse Control ===
+    let mouseX = 0, mouseY = 0;
+    document.addEventListener('mousemove', e => {
+      mouseX = (e.clientX / window.innerWidth - 0.5) * 30;
+      mouseY = (e.clientY / window.innerHeight - 0.5) * 20;
+    });
+
+    // === Animation ===
+    function animate() {
+      requestAnimationFrame(animate);
+
+      const pos = geometry.attributes.position.array;
+      for (let i = 2; i < pos.length; i += 3) {
+        pos[i] += 0.8;
+        if (pos[i] > 50) pos[i] = -400;
+      }
+      geometry.attributes.position.needsUpdate = true;
+
+      camera.position.x += (mouseX - camera.position.x) * 0.05;
+      camera.position.y += (-mouseY - camera.position.y) * 0.05;
+
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // === Infinite Typewriter ===
+    const words = ["Jhon Rhyb", "Web Developer", "Creative Coder", "UI Designer"];
+    const el = document.getElementById("typewriter");
+    let wordIndex = 0, charIndex = 0, isDeleting = false;
+    function typeLoop() {
+      const currentWord = words[wordIndex];
+      if (!isDeleting) {
+        el.textContent = currentWord.substring(0, charIndex + 1);
+        charIndex++;
+        if (charIndex === currentWord.length) setTimeout(() => isDeleting = true, 1200);
+      } else {
+        el.textContent = currentWord.substring(0, charIndex - 1);
+        charIndex--;
+        if (charIndex === 0) { isDeleting = false; wordIndex = (wordIndex + 1) % words.length; }
+      }
+      const speed = isDeleting ? 70 : 120;
+      setTimeout(typeLoop, speed);
+    }
+    typeLoop();
+  </script>
 </body>
+
 </html>
