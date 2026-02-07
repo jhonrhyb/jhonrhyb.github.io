@@ -59,7 +59,7 @@ html {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: black;
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -68,16 +68,16 @@ html {
   font-size: 1rem;
   text-decoration: none;
   transition: 0.3s;
-  border-bottom: 1px solid #00ffdd;
+  /* border-bottom: 1px solid #00ffdd;
   border-right: 1px solid #00ffdd;
-  box-shadow: 0 0 10px #00ffdd;
+  box-shadow: 0 0 10px #00ffdd; */
 }
 
 .navbar .logo:hover {
   transform: scale(1.1);
   color: #fff;
-  text-shadow: 0 0 10px #00ffdd;
-  box-shadow: 0 0 20px #00ffdd;
+  /* text-shadow: 0 0 10px #00ffdd;
+  box-shadow: 0 0 20px #00ffdd; */
 }
 
 .navbar .hamburger {

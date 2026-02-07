@@ -9,6 +9,7 @@ const isDesktop = () => window.innerWidth >= 768;
 setTimeout(() => {
   const words = ["Jhon Rhyb", "Web Developer", "UI/UX Designer"];
   const el = document.getElementById("typewriter");
+  const prefixEl = document.getElementById("prefix");
   let wordIndex = 0, charIndex = 0, isDeleting = false, lastTime = 0;
 
   function typeLoop(time) {
@@ -32,6 +33,12 @@ setTimeout(() => {
       if (charIndex === 0) {
         isDeleting = false;
         wordIndex = (wordIndex + 1) % words.length;
+        // Update prefix based on new word
+        if (words[wordIndex] === "Jhon Rhyb") {
+          prefixEl.textContent = "Hi, I'm ";
+        } else {
+          prefixEl.textContent = "Hi, I'm a ";
+        }
       }
     }
     requestAnimationFrame(typeLoop);
