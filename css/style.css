@@ -1,0 +1,255 @@
+/* Reset & Base */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  background: black;
+  color: white;
+  font-family: "Segoe UI", sans-serif;
+  overflow-x: hidden;
+}
+
+/* Canvas */
+#bg {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Navbar */
+.navbar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background: rgba(0, 0, 0, 1);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid #00ffdd;
+  z-index: 10;
+}
+
+.navbar .logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #00ffdd;
+  letter-spacing: 1px;
+  text-decoration: none;
+  /* remove underline */
+  transition: 0.3s;
+}
+
+.navbar .logo:hover {
+  color: #fff;
+  text-shadow: 0 0 10px #00ffdd;
+}
+
+.navbar .nav-links {
+  display: flex;
+  gap: 2rem;
+  list-style: none;
+}
+
+.navbar .nav-links li a {
+  color: #00ffdd;
+  text-decoration: none;
+  font-weight: 500;
+  transition: 0.3s;
+}
+
+.navbar .nav-links li a:hover {
+  color: #fff;
+  text-shadow: 0 0 10px #00ffdd;
+}
+
+/* Responsive Navbar */
+@media (max-width:768px) {
+  .navbar {
+    flex-direction: column;
+    padding: 1rem;
+  }
+
+  .navbar .nav-links {
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 0.5rem;
+  }
+}
+
+/* Hero */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 2rem;
+  backdrop-filter: blur(6px);
+  position: relative;
+  z-index: 1;
+}
+
+.hero-img {
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  /* makes it circular */
+  object-fit: cover;
+  border: 3px solid #00ffdd;
+  /* neon outline */
+  margin-bottom: 1.5rem;
+  box-shadow: 0 0 20px #00ffdd;
+  transition: transform 0.3s, box-shadow 0.3s;
+  animation: pulse 2s infinite;
+  /* Added pulsing animation */
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 20px #00ffdd;
+  }
+
+  50% {
+    box-shadow: 0 0 40px #00ffdd;
+  }
+
+  100% {
+    box-shadow: 0 0 20px #00ffdd;
+  }
+}
+
+.hero-img:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 35px #00ffdd;
+  animation-play-state: paused;
+  /* Pause pulsing on hover for smooth transition */
+}
+
+.hero h1 {
+  font-size: clamp(2.2rem, 5vw, 3.5rem);
+  margin-bottom: 1rem;
+}
+
+#typewriter {
+  color: #00ffdd;
+  border-right: 3px solid #00ffdd;
+  padding-right: 6px;
+  animation: blink 0.8s infinite;
+}
+
+@keyframes blink {
+  0% {
+    border-color: transparent;
+  }
+
+  50% {
+    border-color: #00ffdd;
+  }
+
+  100% {
+    border-color: transparent;
+  }
+}
+
+.hero p {
+  opacity: 0.85;
+  font-size: 1.2rem;
+}
+
+.btn {
+  margin-top: 1.5rem;
+  padding: 12px 32px;
+  border-radius: 30px;
+  background: #00ffdd;
+  color: black;
+  text-decoration: none;
+  font-weight: bold;
+  transition: .3s;
+}
+
+.btn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 25px rgba(0, 255, 242, 0.7);
+}
+
+/* Sections */
+section {
+  max-width: 1100px;
+  margin: 4rem auto;
+  padding: 3rem 2rem;
+  background: rgba(0, 0, 0, 0.65);
+  border-radius: 20px;
+  backdrop-filter: blur(6px);
+}
+
+h2 {
+  color: #00ffdd;
+  margin-bottom: 1.5rem;
+}
+
+.skill-grid {
+  position: relative;
+  width: 100%;
+  /* height will be set dynamically by JS */
+}
+
+.skill-grid span {
+  position: absolute;
+  /* absolute to animate */
+  width: 120px;
+  /* Fixed width to prevent overlapping due to varying content lengths */
+  padding: 10px 15px;
+  border-radius: 15px;
+  background: rgba(0, 204, 255, 0.15);
+  border: 1px solid rgba(0, 255, 242, 0.7);
+  cursor: default;
+  transition: transform 0.7s ease;
+  display: inline-block;
+  text-align: center;
+  /* Center text in fixed width */
+  box-sizing: border-box;
+  /* Ensure padding is included in width */
+}
+
+.projects {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.project-card {
+  padding: 1.5rem;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.75);
+  border: 1px solid rgba(0, 255, 242, 0.7);
+  transition: .3s;
+}
+
+.project-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 0 25px rgba(0, 255, 242, 0.7);
+}
+
+.contact {
+  text-align: center;
+  margin-bottom: 4rem;
+}
+
+@media (max-width:768px) {
+  section {
+    margin: 2rem 1rem;
+    padding: 2rem 1.5rem;
+  }
+}
