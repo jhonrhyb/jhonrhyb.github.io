@@ -34,31 +34,74 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 1rem 2rem;
-  background: rgba(0, 0, 0, 1);
+  background: rgba(0, 0, 0, .3);
   backdrop-filter: blur(6px);
   border-bottom: 1px solid #00ffdd;
   z-index: 10;
+  transition: transform 0.3s ease;
+  /* Add smooth slide animation */
 }
 
 .navbar .logo {
-  font-size: 1.5rem;
-  font-weight: bold;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: #00ffdd;
-  letter-spacing: 1px;
+  font-weight: bold;
+  font-size: 1rem;
   text-decoration: none;
-  /* remove underline */
   transition: 0.3s;
+  border-bottom: 1px solid #00ffdd;
+  border-right: 1px solid #00ffdd;
+  box-shadow: 0 0 10px #00ffdd;
 }
 
 .navbar .logo:hover {
-  color: #fff;
-  text-shadow: 0 0 10px #00ffdd;
+  transform: scale(1.1);
+  box-shadow: 0 0 20px #00ffdd;
+}
+
+.navbar .hamburger {
+  display: none;
+  flex-direction: column;
+  cursor: pointer;
+  gap: 4px;
+}
+
+.navbar .hamburger span {
+  width: 25px;
+  height: 3px;
+  background: #00ffdd;
+  transition: transform 0.3s ease;
+  /* Optimized for smoothness */
+  will-change: transform;
+  /* Hint for hardware acceleration */
+}
+
+.navbar .hamburger.active span:nth-child(1) {
+  transform: rotate(-45deg) translate(-5px, 5px);
+}
+
+.navbar .hamburger.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.navbar .hamburger.active span:nth-child(3) {
+  transform: rotate(45deg) translate(-5px, -5px);
 }
 
 .navbar .nav-links {
   display: flex;
   gap: 2rem;
   list-style: none;
+  transition: max-height 0.3s ease;
+  /* Smooth transition */
+  will-change: max-height;
+  /* Hint for hardware acceleration */
 }
 
 .navbar .nav-links li a {
@@ -74,16 +117,36 @@ body {
 }
 
 /* Responsive Navbar */
-@media (max-width:768px) {
+@media (max-width: 768px) {
   .navbar {
-    flex-direction: column;
     padding: 1rem;
   }
 
+  .navbar .hamburger {
+    display: flex;
+  }
+
   .navbar .nav-links {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
     flex-direction: column;
+    background: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid #00ffdd;
+    max-height: 0;
+    overflow: hidden;
     gap: 1rem;
-    margin-top: 0.5rem;
+    padding: 0 1rem;
+    will-change: max-height;
+    /* Ensure smooth expansion/collapse */
+  }
+
+  .navbar .nav-links.active {
+    max-height: 300px;
+    /* Adjust based on content */
+    padding: 1rem;
   }
 }
 
@@ -96,7 +159,7 @@ body {
   align-items: center;
   text-align: center;
   padding: 2rem;
-  backdrop-filter: blur(6px);
+  /* backdrop-filter: blur(6px); */
   position: relative;
   z-index: 1;
 }
@@ -107,12 +170,15 @@ body {
   border-radius: 50%;
   /* makes it circular */
   object-fit: cover;
-  border: 3px solid #00ffdd;
+  border-bottom: 3px solid #00ffdd;
+  border-right: 3px solid #00ffdd;
   /* neon outline */
   margin-bottom: 1.5rem;
   box-shadow: 0 0 20px #00ffdd;
-  transition: transform 0.3s, box-shadow 0.3s;
+  transition: transform 0.6s, box-shadow 0.6s;
   animation: pulse 2s infinite;
+  pointer-events: none;
+  user-select: none;
   /* Added pulsing animation */
 }
 
@@ -226,6 +292,11 @@ h2 {
   /* Prevent text selection during drag */
 }
 
+.skill-grid span:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 0 25px rgba(0, 255, 242, 0.7);
+}
+
 .skill-grid span:active {
   cursor: grabbing;
   /* Indicate grabbing during drag */
@@ -260,4 +331,66 @@ h2 {
     margin: 2rem 1rem;
     padding: 2rem 1.5rem;
   }
+}
+
+/* ===== CUSTOM SCROLLBAR STYLES ===== */
+/* Webkit-based browsers (Chrome, Safari, Edge, Opera) */
+::-webkit-scrollbar {
+  width: 8px;
+  /* Thin scrollbar for modern look */
+  height: 8px;
+  /* For horizontal scrollbar if needed */
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.5);
+  /* Semi-transparent black to blend with background */
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #00ffdd;
+  /* Cyan thumb to match theme */
+  border-radius: 4px;
+  box-shadow: 0 0 8px #00ffdd;
+  /* Neon glow effect */
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #00ffff;
+  /* Slightly brighter cyan on hover */
+  box-shadow: 0 0 12px #00ffff;
+  /* Enhanced glow */
+}
+
+::-webkit-scrollbar-corner {
+  background: rgba(0, 0, 0, 0.5);
+  /* Corner where scrollbars meet */
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  /* Thin scrollbar */
+  scrollbar-color: #00ffdd rgba(0, 0, 0, 0.5);
+  /* Thumb color, track color */
+}
+
+/* ===== SCROLL SNAPPING ===== */
+/* Enable vertical scroll snapping on the root element */
+html {
+  scroll-snap-type: y mandatory;
+  /* Forces snapping to sections vertically */
+  scroll-behavior: smooth;
+  /* Adds smooth scrolling for anchor links (e.g., nav clicks) */
+  scroll-padding-top: 80px;
+  /* Offset for fixed navbar height to prevent overlap */
+}
+
+/* Snap to the start of each section and hero */
+.hero,
+section {
+  scroll-snap-align: start;
+  /* Aligns the top of each element to the viewport */
 }

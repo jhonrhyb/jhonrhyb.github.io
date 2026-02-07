@@ -6,6 +6,7 @@
   <title>Matrix Developer Portfolio</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="./css/style.css">
+  <link href="./css/aos@2.3.4.css">
 </head>
 
 <body>
@@ -13,8 +14,13 @@
   <canvas id="bg"></canvas>
 
   <nav class="navbar">
-    <a href="#hero" class="logo">💻</a>
-    <ul class="nav-links">
+    <a href="#hero" class="logo">JO</a>
+    <div class="hamburger" id="hamburger">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+    <ul class="nav-links" id="nav-links">
       <li><a href="#about">About</a></li>
       <li><a href="#skills">Skills</a></li>
       <li><a href="#projects">Projects</a></li>
@@ -25,7 +31,7 @@
   <header class="hero" id="hero">
     <img src="./image/developer.jpg" alt="Developer Avatar" class="hero-img">
     <h1>Hi, I'm <span id="typewriter"></span></h1>
-    <p>Web Developer & Creative Coder</p>
+    <!-- <p>Web Developer & Creative Coder</p> -->
     <a href="#projects" class="btn">View My Work</a>
   </header>
 
@@ -88,7 +94,7 @@
       0.1,
       1000
     );
-    camera.position.z = 80;
+    camera.position.z = 150;
 
     const renderer = new THREE.WebGLRenderer({
       canvas,
@@ -99,75 +105,192 @@
     renderer.setPixelRatio(window.devicePixelRatio);
 
     /* =====================
-       RANDOM CHARACTER
+       EARTH AXIAL TILT
     ===================== */
-    const chars = "0123456789";
-
-    function randomChar() {
-      return chars[Math.floor(Math.random() * chars.length)];
-    }
-
-    function createCharTexture(char) {
-      const size = 64;
-      const canvas = document.createElement("canvas");
-      canvas.width = canvas.height = size;
-      const ctx = canvas.getContext("2d");
-
-      ctx.clearRect(0, 0, size, size);
-      ctx.font = "bold 48px monospace";
-      ctx.fillStyle = "#00ffdd";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-
-      ctx.shadowColor = "#00ffdd";
-      ctx.shadowBlur = 10;
-
-      ctx.fillText(char, size / 2, size / 2);
-
-      return new THREE.CanvasTexture(canvas);
-    }
+    const EARTH_TILT = THREE.MathUtils.degToRad(23.5);
+    scene.rotation.z = EARTH_TILT;
 
     /* =====================
-       MATRIX CHARACTERS
+       GLITTER TEXTURE (for atmosphere)
+    ===================== */
+    function createGlitterTexture() {
+      const size = 32;
+      const c = document.createElement('canvas');
+      c.width = c.height = size;
+      const ctx = c.getContext('2d');
+
+      const gradient = ctx.createRadialGradient(
+        size / 2, size / 2, 0,
+        size / 2, size / 2, size / 2
+      );
+      gradient.addColorStop(0, 'rgba(255,255,255,1)');
+      gradient.addColorStop(0.3, 'rgba(0,255,255,0.8)');
+      gradient.addColorStop(0.6, 'rgba(0,255,255,0.4)');
+      gradient.addColorStop(1, 'rgba(0,255,255,0)');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, size, size);
+
+      return new THREE.CanvasTexture(c);
+    }
+
+    const glitterTexture = createGlitterTexture();
+
+    /* =====================
+       DIGIT TEXTURES (for particles)
+    ===================== */
+    function createDigitTextures() {
+      const textures = [];
+      const size = 32; // Canvas size for each digit texture
+      for (let digit = 0; digit <= 9; digit++) {
+        const c = document.createElement('canvas');
+        c.width = c.height = size;
+        const ctx = c.getContext('2d');
+
+        // Clear canvas with transparent background
+        ctx.clearRect(0, 0, size, size);
+
+        // Set font and style (monospace for consistent width, cyan color)
+        ctx.font = 'bold 24px "Courier New", monospace'; // Adjust size/font as needed
+        ctx.fillStyle = '#00ffdd'; // Cyan to match theme
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        // Add a subtle glow effect
+        ctx.shadowColor = '#00ffdd';
+        ctx.shadowBlur = 4;
+
+        // Draw the digit centered
+        ctx.fillText(digit.toString(), size / 2, size / 2);
+
+        textures.push(new THREE.CanvasTexture(c));
+      }
+      return textures;
+    }
+
+    const digitTextures = createDigitTextures();
+
+    /* =====================
+       PARTICLES
     ===================== */
     const sprites = [];
-    const COUNT = 700;
+    const COUNT_INNER = 1000;
+    const COUNT_OUTER = 1500;
+    const RADIUS = 70;
+    const HALO_MIN = 80;
+    const HALO_MAX = 120;
 
-    for (let i = 0; i < COUNT; i++) {
-      const char = randomChar();
-      const texture = createCharTexture(char);
-
+    /* ===== INNER PARTICLES ===== */
+    for (let i = 0; i < COUNT_INNER; i++) {
       const material = new THREE.SpriteMaterial({
-        map: texture,
+        map: digitTextures[Math.floor(Math.random() * 10)], // Random digit texture
         transparent: true,
-        opacity: 0.9,
+        opacity: Math.random() * 0.8 + 0.2,
         depthWrite: false
       });
 
       const sprite = new THREE.Sprite(material);
 
+      const u = Math.random();
+      const v = Math.random();
+
+      const phi = Math.acos(
+        THREE.MathUtils.lerp(
+          Math.cos(Math.PI * 0.45),
+          Math.cos(Math.PI * 0.55),
+          u
+        )
+      );
+      const theta = 2 * Math.PI * v;
+
+      sprite.userData = {
+        theta,
+        phi,
+        radius: RADIUS,
+        twinkleSpeed: Math.random() * 0.04 + 0.01,
+        orbitSpeed: Math.random() * 0.001 + 0.0005,
+        parallaxStrength: 1.2
+      };
+
       sprite.position.set(
-        (Math.random() - 0.5) * 400,
-        (Math.random() - 0.5) * 250,
-        Math.random() * -600
+        RADIUS * Math.sin(phi) * Math.cos(theta),
+        RADIUS * Math.sin(phi) * Math.sin(theta),
+        RADIUS * Math.cos(phi)
       );
 
-      sprite.scale.set(8, 8, 1);
-      sprite.userData.speed = 0.5 + Math.random() * 0.6;
-
-      scene.add(sprite);
       sprites.push(sprite);
+      scene.add(sprite);
+    }
+
+    /* ===== OUTER HALO ===== */
+    for (let i = 0; i < COUNT_OUTER; i++) {
+      const material = new THREE.SpriteMaterial({
+        map: digitTextures[Math.floor(Math.random() * 10)], // Random digit texture
+        transparent: true,
+        opacity: Math.random() * 0.4 + 0.05,
+        depthWrite: false
+      });
+
+      const sprite = new THREE.Sprite(material);
+
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(2 * Math.random() - 1);
+      const radius = Math.random() * (HALO_MAX - HALO_MIN) + HALO_MIN;
+
+      sprite.userData = {
+        theta,
+        phi,
+        radius,
+        twinkleSpeed: Math.random() * 0.03 + 0.005,
+        orbitSpeed: Math.random() * 0.0006 + 0.0003,
+        parallaxStrength: 0.35
+      };
+
+      sprite.position.set(
+        radius * Math.sin(phi) * Math.cos(theta),
+        radius * Math.sin(phi) * Math.sin(theta),
+        radius * Math.cos(phi)
+      );
+
+      sprites.push(sprite);
+      scene.add(sprite);
     }
 
     /* =====================
-       MOUSE TRACKING
+       ATMOSPHERE (center - glitter, not digit)
+    ===================== */
+    const atmosphere = new THREE.Sprite(
+      new THREE.SpriteMaterial({
+        map: glitterTexture, // Back to glitter for the center
+        transparent: true,
+        opacity: 0.18,
+        depthWrite: false
+      })
+    );
+    atmosphere.scale.set(220, 220, 1);
+    scene.add(atmosphere);
+
+    /* =====================
+       MOUSE + PARALLAX
     ===================== */
     const mouse = new THREE.Vector2(999, 999);
+    const raycaster = new THREE.Raycaster();
+    const parallax = { x: 0, y: 0 };
 
     window.addEventListener("mousemove", e => {
       mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
       mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+      parallax.x = (e.clientX / window.innerWidth - 0.5) * 2;
+      parallax.y = (e.clientY / window.innerHeight - 0.5) * 2;
     });
+
+    function getMouse3D() {
+      const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), -60);
+      raycaster.setFromCamera(mouse, camera);
+      const point = new THREE.Vector3();
+      raycaster.ray.intersectPlane(plane, point);
+      return point;
+    }
 
     /* =====================
        ANIMATION LOOP
@@ -175,34 +298,51 @@
     function animate() {
       requestAnimationFrame(animate);
 
+      scene.rotation.y += 0.0006;
+      atmosphere.rotation.y += 0.0004;
+
+      // CAMERA PARALLAX
+      camera.position.x += (parallax.x * 12 - camera.position.x) * 0.05;
+      camera.position.y += (-parallax.y * 12 - camera.position.y) * 0.05;
+      camera.lookAt(scene.position);
+
+      const mousePos = getMouse3D();
+
       sprites.forEach(sprite => {
-        /* Forward motion */
-        sprite.position.z += sprite.userData.speed;
+        sprite.material.opacity +=
+          (Math.random() - 0.5) * sprite.userData.twinkleSpeed;
+        sprite.material.opacity = THREE.MathUtils.clamp(
+          sprite.material.opacity, 0.1, 1
+        );
 
-        if (sprite.position.z > 50) {
-          sprite.position.z = -600;
-          sprite.position.x = (Math.random() - 0.5) * 400;
-          sprite.position.y = (Math.random() - 0.5) * 250;
-        }
+        sprite.userData.theta += sprite.userData.orbitSpeed;
 
-        /* Soft mouse gravity */
-        const mx = mouse.x * 120;
-        const my = mouse.y * 70;
+        const x =
+          sprite.userData.radius *
+          Math.sin(sprite.userData.phi) *
+          Math.cos(sprite.userData.theta);
+        const y =
+          sprite.userData.radius *
+          Math.sin(sprite.userData.phi) *
+          Math.sin(sprite.userData.theta);
+        const z =
+          sprite.userData.radius *
+          Math.cos(sprite.userData.phi);
 
-        const dx = mx - sprite.position.x;
-        const dy = my - sprite.position.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
+        sprite.position.lerp(new THREE.Vector3(x, y, z), 0.05);
 
-        const radius = 60;
+        const dx = mousePos.x - sprite.position.x;
+        const dy = mousePos.y - sprite.position.y;
+        const dz = mousePos.z - sprite.position.z;
+        const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
 
-        if (dist < radius) {
-          const force = (radius - dist) / radius;
+        if (dist < 40) {
+          const force = (40 - dist) / 40;
+          const p = sprite.userData.parallaxStrength;
 
-          sprite.position.x += dx * force * 0.006;
-          sprite.position.y += dy * force * 0.006;
-
-          sprite.position.x += -dy * force * 0.003;
-          sprite.position.y += dx * force * 0.003;
+          sprite.position.x += dx * force * 0.08 * p;
+          sprite.position.y += dy * force * 0.08 * p;
+          sprite.position.z += dz * force * 0.08 * p;
         }
       });
 

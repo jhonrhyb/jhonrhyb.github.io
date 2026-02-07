@@ -1,23 +1,34 @@
 // === Infinite Typewriter ===
-const words = ["?@!#$%^&*()_+-=", "Web Developer", "UI/UX Designer"];
+const words = ["Jhon Rhyb", "Web Developer", "UI/UX Designer"];
 const el = document.getElementById("typewriter");
-let wordIndex = 0, charIndex = 0, isDeleting = false;
-function typeLoop() {
+let wordIndex = 0, charIndex = 0, isDeleting = false, lastTime = 0;
+
+function typeLoop(currentTime) {
+  if (currentTime - lastTime < 100) { // Throttle to ~10 FPS for smoother typing
+    requestAnimationFrame(typeLoop);
+    return;
+  }
+  lastTime = currentTime;
+
   const currentWord = words[wordIndex];
   if (!isDeleting) {
     el.textContent = currentWord.substring(0, charIndex + 1);
     charIndex++;
-    if (charIndex === currentWord.length) setTimeout(() => isDeleting = true, 1200);
+    if (charIndex === currentWord.length) {
+      setTimeout(() => isDeleting = true, 1200);
+    }
   } else {
     el.textContent = currentWord.substring(0, charIndex - 1);
     charIndex--;
-    if (charIndex === 0) { isDeleting = false; wordIndex = (wordIndex + 1) % words.length; }
+    if (charIndex === 0) {
+      isDeleting = false;
+      wordIndex = (wordIndex + 1) % words.length;
+    }
   }
-  const speed = isDeleting ? 70 : 120;
-  setTimeout(typeLoop, speed);
+  requestAnimationFrame(typeLoop);
 }
 
-typeLoop();
+requestAnimationFrame(typeLoop);
 
 window.addEventListener("mousemove", e => {
   const mx = (e.clientX / window.innerWidth - 0.5) * 20;
@@ -40,9 +51,11 @@ let draggedElement = null;
 let offsetX = 0;
 let offsetY = 0;
 let shuffleInterval;
+let dragRAF = null; // For requestAnimationFrame in drag
 
 // Calculate grid layout
 function calculateGrid() {
+  if (skills.length === 0) return;
   cellWidth = skills[0].offsetWidth;
   cellHeight = skills[0].offsetHeight;
   const containerWidth = skillGrid.clientWidth;
@@ -95,26 +108,39 @@ function shuffleSkills() {
 
 // Drag event handlers
 function startDrag(e) {
+  e.preventDefault(); // Prevent default touch behavior
   isDragging = true;
   draggedElement = e.target;
   const rect = draggedElement.getBoundingClientRect();
-  offsetX = e.clientX - rect.left;
-  offsetY = e.clientY - rect.top;
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+  offsetX = clientX - rect.left;
+  offsetY = clientY - rect.top;
   draggedElement.style.transition = 'none'; // Disable transition during drag
   draggedElement.style.zIndex = 10; // Bring to front
+  draggedElement.style.willChange = 'transform'; // Optimize for animation
   document.addEventListener('mousemove', drag);
+  document.addEventListener('touchmove', drag, { passive: false });
   document.addEventListener('mouseup', endDrag);
+  document.addEventListener('touchend', endDrag);
 }
 
 function drag(e) {
+  e.preventDefault(); // Prevent scrolling during drag
   if (!isDragging || !draggedElement) return;
-  const gridRect = skillGrid.getBoundingClientRect();
-  let x = e.clientX - gridRect.left - offsetX;
-  let y = e.clientY - gridRect.top - offsetY;
-  // Constrain within grid bounds
-  x = Math.max(0, Math.min(x, gridRect.width - cellWidth));
-  y = Math.max(0, Math.min(y, gridRect.height - cellHeight));
-  draggedElement.style.transform = `translate(${x}px, ${y}px)`;
+
+  if (dragRAF) cancelAnimationFrame(dragRAF);
+  dragRAF = requestAnimationFrame(() => {
+    const gridRect = skillGrid.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    let x = clientX - gridRect.left - offsetX;
+    let y = clientY - gridRect.top - offsetY;
+    // Constrain within grid bounds
+    x = Math.max(0, Math.min(x, gridRect.width - cellWidth));
+    y = Math.max(0, Math.min(y, gridRect.height - cellHeight));
+    draggedElement.style.transform = `translate(${x}px, ${y}px)`;
+  });
 }
 
 function endDrag() {
@@ -122,6 +148,7 @@ function endDrag() {
   isDragging = false;
   draggedElement.style.transition = 'transform 0.7s ease'; // Re-enable transition
   draggedElement.style.zIndex = ''; // Reset z-index
+  draggedElement.style.willChange = ''; // Reset optimization
   // Snap to nearest grid position
   const rect = draggedElement.getBoundingClientRect();
   const gridRect = skillGrid.getBoundingClientRect();
@@ -142,12 +169,16 @@ function endDrag() {
   layoutSkills();
   draggedElement = null;
   document.removeEventListener('mousemove', drag);
+  document.removeEventListener('touchmove', drag);
   document.removeEventListener('mouseup', endDrag);
+  document.removeEventListener('touchend', endDrag);
+  if (dragRAF) cancelAnimationFrame(dragRAF);
 }
 
-// Attach drag listeners to skills
+// Attach drag listeners to skills (both mouse and touch)
 skills.forEach(skill => {
   skill.addEventListener('mousedown', startDrag);
+  skill.addEventListener('touchstart', startDrag, { passive: false });
 });
 
 // Pause shuffle on hover
@@ -159,15 +190,28 @@ skillGrid.addEventListener('mouseleave', () => {
   shuffleInterval = setInterval(shuffleSkills, 3000);
 });
 
+// Hamburger menu toggle
+const hamburger = document.getElementById('hamburger');
+const navLinks = document.getElementById('nav-links');
+
+hamburger.addEventListener('click', () => {
+  hamburger.classList.toggle('active');
+  navLinks.classList.toggle('active');
+});
+
+// Debounce resize
+let resizeTimeout;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimeout);
+  resizeTimeout = setTimeout(() => {
+    calculateGrid();
+    layoutSkills();
+  }, 100);
+});
+
 // Initialize
 calculateGrid();
 layoutSkills();
 
 // Shuffle every 3 seconds
 shuffleInterval = setInterval(shuffleSkills, 3000);
-
-// Recalculate on resize
-window.addEventListener('resize', () => {
-  calculateGrid();
-  layoutSkills();
-});
