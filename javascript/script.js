@@ -1,34 +1,35 @@
 // === Infinite Typewriter ===
-const words = ["Jhon Rhyb", "Web Developer", "UI/UX Designer"];
-const el = document.getElementById("typewriter");
-let wordIndex = 0, charIndex = 0, isDeleting = false, lastTime = 0;
+setTimeout(() => {
+  const words = ["Jhon Rhyb", "Web Developer", "UI/UX Designer"];
+  const el = document.getElementById("typewriter");
+  let wordIndex = 0, charIndex = 0, isDeleting = false, lastTime = 0;
 
-function typeLoop(currentTime) {
-  if (currentTime - lastTime < 100) { // Throttle to ~10 FPS for smoother typing
+  function typeLoop(currentTime) {
+    if (currentTime - lastTime < 100) { // Throttle to ~10 FPS for smoother typing
+      requestAnimationFrame(typeLoop);
+      return;
+    }
+    lastTime = currentTime;
+
+    const currentWord = words[wordIndex];
+    if (!isDeleting) {
+      el.textContent = currentWord.substring(0, charIndex + 1);
+      charIndex++;
+      if (charIndex === currentWord.length) {
+        setTimeout(() => isDeleting = true, 1200);
+      }
+    } else {
+      el.textContent = currentWord.substring(0, charIndex - 1);
+      charIndex--;
+      if (charIndex === 0) {
+        isDeleting = false;
+        wordIndex = (wordIndex + 1) % words.length;
+      }
+    }
     requestAnimationFrame(typeLoop);
-    return;
-  }
-  lastTime = currentTime;
-
-  const currentWord = words[wordIndex];
-  if (!isDeleting) {
-    el.textContent = currentWord.substring(0, charIndex + 1);
-    charIndex++;
-    if (charIndex === currentWord.length) {
-      setTimeout(() => isDeleting = true, 1200);
-    }
-  } else {
-    el.textContent = currentWord.substring(0, charIndex - 1);
-    charIndex--;
-    if (charIndex === 0) {
-      isDeleting = false;
-      wordIndex = (wordIndex + 1) % words.length;
-    }
   }
   requestAnimationFrame(typeLoop);
-}
-
-requestAnimationFrame(typeLoop);
+}, 4000);
 
 window.addEventListener("mousemove", e => {
   const mx = (e.clientX / window.innerWidth - 0.5) * 20;
@@ -215,3 +216,54 @@ layoutSkills();
 
 // Shuffle every 3 seconds
 shuffleInterval = setInterval(shuffleSkills, 3000);
+
+const sections = document.querySelectorAll('section');
+
+const observer = new IntersectionObserver(
+  (entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting)
+        entry.target.classList.add('visible');   // section comes into view
+      else
+        entry.target.classList.remove('visible'); // section goes out of view
+    });
+  },
+  {
+    threshold: 0.5 // triggers when 50% of section is visible
+  }
+);
+
+sections.forEach(section => observer.observe(section));
+
+/* Smooth scrolling for header and section */
+let sectionsHero = document.querySelectorAll('header, section');
+let currentSection = 0;
+let isScrolling = false;
+
+function scrollToSection(index) {
+  if (index < 0 || index >= sectionsHero.length) return;
+  isScrolling = true;
+  sectionsHero[index].scrollIntoView({ behavior: 'smooth' });
+
+  setTimeout(() => {
+    isScrolling = false;
+    currentSection = index;
+  }, 600); // match CSS transition duration
+}
+
+window.addEventListener('wheel', (e) => {
+  if (isScrolling) return;
+
+  if (e.deltaY > 0) {
+    scrollToSection(currentSection + 1);
+  } else {
+    scrollToSection(currentSection - 1);
+  }
+});
+
+// Fade in content after 1 second and show scrollbar
+setTimeout(() => {
+  document.querySelector('.content').style.opacity = '1';
+  document.querySelector('.content').style.visibility = 'visible';
+  document.documentElement.style.overflow = 'auto'; // Show scrollbar
+}, 2000);
