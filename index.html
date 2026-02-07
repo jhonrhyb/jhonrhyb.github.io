@@ -31,7 +31,7 @@
 
     <header class="hero" id="hero">
       <img src="./image/developer.jpg" alt="Developer Avatar" class="hero-img">
-      <h1>Hi, I'm a <span id="typewriter"></span></h1>
+      <h1>Hi, I'm <span id="typewriter"></span></h1>
       <!-- <p>Web Developer & Creative Coder</p> -->
       <a href="#projects" class="btn">View My Work</a>
     </header>
@@ -85,6 +85,11 @@
     import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.module.js';
 
     /* =====================
+       HELPERS
+    ===================== */
+    const isDesktop = () => window.innerWidth >= 768;
+
+    /* =====================
        SCENE SETUP
     ===================== */
     const canvas = document.getElementById("bg");
@@ -113,7 +118,7 @@
     scene.rotation.z = EARTH_TILT;
 
     /* =====================
-       GLITTER TEXTURE (for atmosphere)
+       GLITTER TEXTURE
     ===================== */
     function createGlitterTexture() {
       const size = 32;
@@ -138,30 +143,24 @@
     const glitterTexture = createGlitterTexture();
 
     /* =====================
-       DIGIT TEXTURES (for particles)
+       DIGIT TEXTURES
     ===================== */
     function createDigitTextures() {
       const textures = [];
-      const size = 32; // Canvas size for each digit texture
+      const size = 32;
+
       for (let digit = 0; digit <= 9; digit++) {
         const c = document.createElement('canvas');
         c.width = c.height = size;
         const ctx = c.getContext('2d');
 
-        // Clear canvas with transparent background
         ctx.clearRect(0, 0, size, size);
-
-        // Set font and style (monospace for consistent width, cyan color)
-        ctx.font = 'bold 24px "Courier New", monospace'; // Adjust size/font as needed
-        ctx.fillStyle = '#00ffdd'; // Cyan to match theme
+        ctx.font = 'bold 24px "Courier New", monospace';
+        ctx.fillStyle = '#00ffdd';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-
-        // Add a subtle glow effect
         ctx.shadowColor = '#00ffdd';
         ctx.shadowBlur = 4;
-
-        // Draw the digit centered
         ctx.fillText(digit.toString(), size / 2, size / 2);
 
         textures.push(new THREE.CanvasTexture(c));
@@ -181,10 +180,10 @@
     const HALO_MIN = 80;
     const HALO_MAX = 120;
 
-    /* ===== INNER PARTICLES ===== */
+    /* ===== INNER ===== */
     for (let i = 0; i < COUNT_INNER; i++) {
       const material = new THREE.SpriteMaterial({
-        map: digitTextures[Math.floor(Math.random() * 10)], // Random digit texture
+        map: digitTextures[Math.floor(Math.random() * 10)],
         transparent: true,
         opacity: Math.random() * 0.8 + 0.2,
         depthWrite: false
@@ -194,7 +193,6 @@
 
       const u = Math.random();
       const v = Math.random();
-
       const phi = Math.acos(
         THREE.MathUtils.lerp(
           Math.cos(Math.PI * 0.45),
@@ -226,7 +224,7 @@
     /* ===== OUTER HALO ===== */
     for (let i = 0; i < COUNT_OUTER; i++) {
       const material = new THREE.SpriteMaterial({
-        map: digitTextures[Math.floor(Math.random() * 10)], // Random digit texture
+        map: digitTextures[Math.floor(Math.random() * 10)],
         transparent: true,
         opacity: Math.random() * 0.4 + 0.05,
         depthWrite: false
@@ -258,11 +256,11 @@
     }
 
     /* =====================
-       ATMOSPHERE (center - glitter, not digit)
+       ATMOSPHERE
     ===================== */
     const atmosphere = new THREE.Sprite(
       new THREE.SpriteMaterial({
-        map: glitterTexture, // Back to glitter for the center
+        map: glitterTexture,
         transparent: true,
         opacity: 0.18,
         depthWrite: false
@@ -279,6 +277,8 @@
     const parallax = { x: 0, y: 0 };
 
     window.addEventListener("mousemove", e => {
+      if (!isDesktop()) return;
+
       mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
       mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
 
@@ -304,11 +304,17 @@
       atmosphere.rotation.y += 0.0004;
 
       // CAMERA PARALLAX
-      camera.position.x += (parallax.x * 12 - camera.position.x) * 0.05;
-      camera.position.y += (-parallax.y * 12 - camera.position.y) * 0.05;
+      if (isDesktop()) {
+        camera.position.x += (parallax.x * 12 - camera.position.x) * 0.05;
+        camera.position.y += (-parallax.y * 12 - camera.position.y) * 0.05;
+      } else {
+        camera.position.x += (0 - camera.position.x) * 0.05;
+        camera.position.y += (0 - camera.position.y) * 0.05;
+      }
+
       camera.lookAt(scene.position);
 
-      const mousePos = getMouse3D();
+      const mousePos = isDesktop() ? getMouse3D() : null;
 
       sprites.forEach(sprite => {
         sprite.material.opacity +=
@@ -333,18 +339,21 @@
 
         sprite.position.lerp(new THREE.Vector3(x, y, z), 0.05);
 
-        const dx = mousePos.x - sprite.position.x;
-        const dy = mousePos.y - sprite.position.y;
-        const dz = mousePos.z - sprite.position.z;
-        const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+        // MOUSE REPULSION (DESKTOP ONLY)
+        if (isDesktop()) {
+          const dx = mousePos.x - sprite.position.x;
+          const dy = mousePos.y - sprite.position.y;
+          const dz = mousePos.z - sprite.position.z;
+          const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
 
-        if (dist < 40) {
-          const force = (40 - dist) / 40;
-          const p = sprite.userData.parallaxStrength;
+          if (dist < 40) {
+            const force = (40 - dist) / 40;
+            const p = sprite.userData.parallaxStrength;
 
-          sprite.position.x += dx * force * 0.08 * p;
-          sprite.position.y += dy * force * 0.08 * p;
-          sprite.position.z += dz * force * 0.08 * p;
+            sprite.position.x += dx * force * 0.08 * p;
+            sprite.position.y += dy * force * 0.08 * p;
+            sprite.position.z += dz * force * 0.08 * p;
+          }
         }
       });
 
@@ -361,6 +370,7 @@
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
     });
+  </script>
   </script>
   <script src="./javascript/script.js"></script>
 </body>
