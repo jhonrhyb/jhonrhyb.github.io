@@ -29,7 +29,7 @@ setTimeout(() => {
     requestAnimationFrame(typeLoop);
   }
   requestAnimationFrame(typeLoop);
-}, 4000);
+}, 3000);
 
 window.addEventListener("mousemove", e => {
   const mx = (e.clientX / window.innerWidth - 0.5) * 20;
