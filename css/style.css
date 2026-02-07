@@ -214,13 +214,21 @@ h2 {
   border-radius: 15px;
   background: rgba(0, 204, 255, 0.15);
   border: 1px solid rgba(0, 255, 242, 0.7);
-  cursor: default;
+  cursor: grab;
+  /* Changed to grab for draggable indication */
   transition: transform 0.7s ease;
   display: inline-block;
   text-align: center;
   /* Center text in fixed width */
   box-sizing: border-box;
   /* Ensure padding is included in width */
+  user-select: none;
+  /* Prevent text selection during drag */
+}
+
+.skill-grid span:active {
+  cursor: grabbing;
+  /* Indicate grabbing during drag */
 }
 
 .projects {
