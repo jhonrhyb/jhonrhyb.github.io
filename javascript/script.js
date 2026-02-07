@@ -229,7 +229,7 @@ const observer = new IntersectionObserver(
     });
   },
   {
-    threshold: 0.5 // triggers when 50% of section is visible
+    threshold: 0.3 // triggers when 50% of section is visible
   }
 );
 
