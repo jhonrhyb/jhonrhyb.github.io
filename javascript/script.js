@@ -335,8 +335,18 @@ const navLinks = document.getElementById("nav-links");
 
 if (hamburger && navLinks) {
   hamburger.addEventListener("click", () => {
+    console.log('ham');
     hamburger.classList.toggle("active");
     navLinks.classList.toggle("active");
+  });
+}
+
+if (navLinks) {
+  navLinks.addEventListener("click", () => {
+    hamburger.classList.remove("active");
+    navLinks.classList.remove("active");
+    hamburger.classList.toggle("inactive");
+    navLinks.classList.toggle("inactive");
   });
 }
 
@@ -350,7 +360,7 @@ const observer = new IntersectionObserver(
       entry.target.classList.toggle("visible", entry.isIntersecting);
     });
   },
-  { threshold: 0.3 }
+  { threshold: 0.5 }
 );
 
 sections.forEach(section => observer.observe(section));
