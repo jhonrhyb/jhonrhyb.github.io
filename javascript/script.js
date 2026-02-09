@@ -101,7 +101,7 @@ let draggedIcon = null;
 let offsetX = 0;
 let offsetY = 0;
 
-let shuffleInterval = null; // store interval ID
+let isHovering = false; // pause shuffle on hover
 
 // Initialize grid positions
 function setInitialPositions() {
@@ -130,9 +130,6 @@ function startDrag(e) {
   e.preventDefault();
   draggedIcon = e.target;
   isDragging = true;
-
-  // Pause shuffle while dragging
-  clearInterval(shuffleInterval);
 
   const clientX = e.clientX ?? e.touches[0].clientX;
   const clientY = e.clientY ?? e.touches[0].clientY;
@@ -201,18 +198,11 @@ function stopDrag(e) {
   document.removeEventListener('mouseup', stopDrag);
   document.removeEventListener('touchmove', onDrag);
   document.removeEventListener('touchend', stopDrag);
-
-  // Resume auto-shuffle after 1 second
-  setTimeout(() => {
-    if (!shuffleInterval) {
-      shuffleInterval = setInterval(shuffleIcons, 3000);
-    }
-  }, 1000);
 }
 
-// Shuffle icons
+// Shuffle icons every 3 seconds
 function shuffleIcons() {
-  if (isDragging) return;
+  if (isHovering) return; // skip shuffle if mouse is hovering
 
   const shuffledIndexes = [...Array(icons.length).keys()];
   for (let i = shuffledIndexes.length - 1; i > 0; i--) {
@@ -228,9 +218,13 @@ function shuffleIcons() {
   });
 }
 
+// Pause shuffle on hover
+skillGrid.addEventListener('mouseenter', () => isHovering = true);
+skillGrid.addEventListener('mouseleave', () => isHovering = false);
+
 // Initialize
 setInitialPositions();
-shuffleInterval = setInterval(shuffleIcons, 3000);
+setInterval(shuffleIcons, 5000);
 window.addEventListener('resize', setInitialPositions);
 
 /* =====================
