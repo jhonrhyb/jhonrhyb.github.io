@@ -92,7 +92,7 @@ const icons = Array.from(skillGrid.children);
 
 const ICON_WIDTH = 60;
 const ICON_HEIGHT = 60;
-const GAP = 5;
+const GAP = isDesktop() ? 9 : 3;
 
 let positions = [];
 let iconMap = new Map();

@@ -21,7 +21,7 @@
   --canvas-opacity: 0.3;
 
   --text-shadow-main-btn: -1px 0 white, 0 1px white, 1px 0 white, 0 -1px white;
-  
+
   --text-shadow-tooltip: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
   --text-color-tooltip: #fff;
 
@@ -238,6 +238,10 @@ html {
   text-shadow: 0 0 10px var(--accent-color);
 }
 
+#home {
+  display: none;
+}
+
 /* =====================================================
    FUTURISTIC THEME TOGGLE
 ===================================================== */
@@ -408,6 +412,10 @@ body.night-mode .neo-text.night {
 
   .navbar .logo {
     display: none;
+  }
+
+  #home {
+    display: block;
   }
 
   /* MOVE THEME TOGGLE TO LEFT CORNER */
