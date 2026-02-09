@@ -87,147 +87,151 @@ if (isDesktop()) {
 /* =====================
    SKILL GRID SETUP
 ===================== */
-const skillGrid = document.querySelector(".skill-grid");
-if (skillGrid) {
-  const gap = 15;
-  let skills = Array.from(skillGrid.children);
-  let cols = 0;
-  let cellWidth = 0;
-  let cellHeight = 0;
+const skillGrid = document.getElementById('skill-grid');
+const icons = Array.from(skillGrid.children);
 
-  let isDragging = false;
-  let draggedElement = null;
-  let offsetX = 0;
-  let offsetY = 0;
-  let shuffleInterval;
-  let dragRAF = null;
+const ICON_WIDTH = 60;
+const ICON_HEIGHT = 60;
+const GAP = 5;
 
-  function calculateGrid() {
-    if (!skills.length) return;
+let positions = [];
+let iconMap = new Map();
+let isDragging = false;
+let draggedIcon = null;
+let offsetX = 0;
+let offsetY = 0;
 
-    cellWidth = skills[0].offsetWidth;
-    cellHeight = skills[0].offsetHeight;
+let shuffleInterval = null; // store interval ID
 
-    const width = skillGrid.clientWidth;
-    cols = Math.floor((width + gap) / (cellWidth + gap));
-    if (cols < 1) cols = 1;
+// Initialize grid positions
+function setInitialPositions() {
+  const cols = Math.floor(skillGrid.clientWidth / (ICON_WIDTH + GAP));
+  const rows = Math.ceil(icons.length / cols);
+  skillGrid.style.height = (rows * (ICON_HEIGHT + GAP)) + 'px';
 
-    const rows = Math.ceil(skills.length / cols);
-    skillGrid.style.height =
-      rows * (cellHeight + gap) - gap + "px";
-  }
-
-  function layoutSkills(arr = skills) {
-    arr.forEach((skill, i) => {
-      const row = Math.floor(i / cols);
-      const col = i % cols;
-
-      skill.style.transform = `translate(
-        ${col * (cellWidth + gap)}px,
-        ${row * (cellHeight + gap)}px
-      )`;
-    });
-  }
-
-  function shuffleArray(arr) {
-    for (let i = arr.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
-    return arr;
-  }
-
-  function shuffleSkills() {
-    if (isDragging) return;
-    skills = shuffleArray(skills);
-    layoutSkills();
-  }
-
-  /* ===== Drag Support ===== */
-  function startDrag(e) {
-    e.preventDefault();
-    isDragging = true;
-    draggedElement = e.target;
-
-    const rect = draggedElement.getBoundingClientRect();
-    const x = e.touches ? e.touches[0].clientX : e.clientX;
-    const y = e.touches ? e.touches[0].clientY : e.clientY;
-
-    offsetX = x - rect.left;
-    offsetY = y - rect.top;
-
-    draggedElement.style.transition = "none";
-    draggedElement.style.zIndex = 10;
-
-    document.addEventListener("mousemove", drag);
-    document.addEventListener("touchmove", drag, { passive: false });
-    document.addEventListener("mouseup", endDrag);
-    document.addEventListener("touchend", endDrag);
-  }
-
-  function drag(e) {
-    e.preventDefault();
-    if (!isDragging || !draggedElement) return;
-
-    if (dragRAF) cancelAnimationFrame(dragRAF);
-
-    dragRAF = requestAnimationFrame(() => {
-      const grid = skillGrid.getBoundingClientRect();
-      const x =
-        (e.touches ? e.touches[0].clientX : e.clientX) -
-        grid.left -
-        offsetX;
-      const y =
-        (e.touches ? e.touches[0].clientY : e.clientY) -
-        grid.top -
-        offsetY;
-
-      draggedElement.style.transform = `translate(
-        ${Math.max(0, x)}px,
-        ${Math.max(0, y)}px
-      )`;
-    });
-  }
-
-  function endDrag() {
-    if (!draggedElement) return;
-
-    isDragging = false;
-    draggedElement.style.transition = "transform 0.7s ease";
-    draggedElement.style.zIndex = "";
-
-    layoutSkills();
-    draggedElement = null;
-
-    document.removeEventListener("mousemove", drag);
-    document.removeEventListener("touchmove", drag);
-    document.removeEventListener("mouseup", endDrag);
-    document.removeEventListener("touchend", endDrag);
-
-    if (dragRAF) cancelAnimationFrame(dragRAF);
-  }
-
-  skills.forEach(skill => {
-    skill.addEventListener("mousedown", startDrag);
-    skill.addEventListener("touchstart", startDrag, { passive: false });
-  });
-
-  skillGrid.addEventListener("mouseenter", () =>
-    clearInterval(shuffleInterval)
-  );
-  skillGrid.addEventListener("mouseleave", () =>
-    (shuffleInterval = setInterval(shuffleSkills, 3000))
-  );
-
-  calculateGrid();
-  layoutSkills();
-  shuffleInterval = setInterval(shuffleSkills, 3000);
-
-  window.addEventListener("resize", () => {
-    calculateGrid();
-    layoutSkills();
+  positions = [];
+  icons.forEach((icon, i) => {
+    const x = (i % cols) * (ICON_WIDTH + GAP);
+    const y = Math.floor(i / cols) * (ICON_HEIGHT + GAP);
+    positions.push({ x, y });
+    icon.style.left = x + 'px';
+    icon.style.top = y + 'px';
+    iconMap.set(icon, i);
   });
 }
+
+// Dragging logic
+icons.forEach(icon => {
+  icon.addEventListener('mousedown', startDrag);
+  icon.addEventListener('touchstart', startDrag);
+});
+
+function startDrag(e) {
+  e.preventDefault();
+  draggedIcon = e.target;
+  isDragging = true;
+
+  // Pause shuffle while dragging
+  clearInterval(shuffleInterval);
+
+  const clientX = e.clientX ?? e.touches[0].clientX;
+  const clientY = e.clientY ?? e.touches[0].clientY;
+
+  offsetX = clientX - draggedIcon.offsetLeft;
+  offsetY = clientY - draggedIcon.offsetTop;
+
+  draggedIcon.classList.add('dragging');
+
+  document.addEventListener('mousemove', onDrag);
+  document.addEventListener('mouseup', stopDrag);
+  document.addEventListener('touchmove', onDrag, { passive: false });
+  document.addEventListener('touchend', stopDrag);
+}
+
+function onDrag(e) {
+  if (!isDragging || !draggedIcon) return;
+
+  e.preventDefault();
+  const clientX = e.clientX ?? e.touches[0].clientX;
+  const clientY = e.clientY ?? e.touches[0].clientY;
+
+  draggedIcon.style.left = clientX - offsetX + 'px';
+  draggedIcon.style.top = clientY - offsetY + 'px';
+}
+
+function stopDrag(e) {
+  if (!isDragging || !draggedIcon) return;
+
+  isDragging = false;
+  draggedIcon.classList.remove('dragging');
+
+  // Snap to nearest grid cell
+  let nearestIndex = 0;
+  let minDist = Infinity;
+  positions.forEach((pos, i) => {
+    const dx = pos.x - draggedIcon.offsetLeft;
+    const dy = pos.y - draggedIcon.offsetTop;
+    const dist = dx * dx + dy * dy;
+    if (dist < minDist) {
+      minDist = dist;
+      nearestIndex = i;
+    }
+  });
+
+  // Swap if needed
+  const occupiedIcon = Array.from(iconMap.entries()).find(([ic, idx]) => idx === nearestIndex)[0];
+  const currentIndex = iconMap.get(draggedIcon);
+
+  if (occupiedIcon !== draggedIcon) {
+    const currentPos = positions[currentIndex];
+    occupiedIcon.style.left = currentPos.x + 'px';
+    occupiedIcon.style.top = currentPos.y + 'px';
+    iconMap.set(occupiedIcon, currentIndex);
+  }
+
+  const targetPos = positions[nearestIndex];
+  draggedIcon.style.left = targetPos.x + 'px';
+  draggedIcon.style.top = targetPos.y + 'px';
+  iconMap.set(draggedIcon, nearestIndex);
+
+  draggedIcon = null;
+
+  // Remove event listeners
+  document.removeEventListener('mousemove', onDrag);
+  document.removeEventListener('mouseup', stopDrag);
+  document.removeEventListener('touchmove', onDrag);
+  document.removeEventListener('touchend', stopDrag);
+
+  // Resume auto-shuffle after 1 second
+  setTimeout(() => {
+    if (!shuffleInterval) {
+      shuffleInterval = setInterval(shuffleIcons, 3000);
+    }
+  }, 1000);
+}
+
+// Shuffle icons
+function shuffleIcons() {
+  if (isDragging) return;
+
+  const shuffledIndexes = [...Array(icons.length).keys()];
+  for (let i = shuffledIndexes.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffledIndexes[i], shuffledIndexes[j]] = [shuffledIndexes[j], shuffledIndexes[i]];
+  }
+
+  icons.forEach((icon, i) => {
+    const pos = positions[shuffledIndexes[i]];
+    icon.style.left = pos.x + 'px';
+    icon.style.top = pos.y + 'px';
+    iconMap.set(icon, shuffledIndexes[i]);
+  });
+}
+
+// Initialize
+setInitialPositions();
+shuffleInterval = setInterval(shuffleIcons, 3000);
+window.addEventListener('resize', setInitialPositions);
 
 /* =====================
    HAMBURGER MENU
