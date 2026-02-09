@@ -227,6 +227,31 @@ setInitialPositions();
 setInterval(shuffleIcons, 5000);
 window.addEventListener('resize', setInitialPositions);
 
+// Select all skill icons with data-tooltip
+const skillIcons = document.querySelectorAll('#skill-grid img[data-tooltip]');
+
+// Create a floating tooltip element
+const tooltip = document.createElement('div');
+tooltip.classList.add('tooltip');
+document.body.appendChild(tooltip);
+
+// Show tooltip on hover
+skillIcons.forEach(icon => {
+  icon.addEventListener('mouseenter', () => {
+    tooltip.textContent = icon.dataset.tooltip;
+    tooltip.style.opacity = '1';
+  });
+
+  icon.addEventListener('mousemove', e => {
+    tooltip.style.left = e.clientX + 12 + 'px'; // slight offset from cursor
+    tooltip.style.top = e.clientY - 28 + 'px'; // above the cursor
+  });
+
+  icon.addEventListener('mouseleave', () => {
+    tooltip.style.opacity = '0';
+  });
+});
+
 /* =====================
    HAMBURGER MENU
 ===================== */
