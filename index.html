@@ -5,42 +5,78 @@
   <meta charset="UTF-8" />
   <title>Matrix Developer Portfolio</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <link rel="stylesheet" href="./css/style.css">
   <link href="./css/aos@2.3.4.css">
 </head>
 
-<body>
+<body class="day-mode">
 
   <canvas id="bg"></canvas>
 
   <div class="content">
+
+    <!-- =====================
+         NAVBAR
+    ====================== -->
     <nav class="navbar">
-      <a href="#hero" class="logo"><img src="./image/mini-logo.png" alt="" width="110" height="80"></a>
+      <a href="#hero" class="logo">
+        <img src="./image/mini-logo.png" alt="Logo" width="110" height="80">
+      </a>
+
       <div class="hamburger" id="hamburger">
         <span></span>
         <span></span>
         <span></span>
       </div>
-      <ul class="nav-links" id="nav-links">
-        <li><a href="#about">About</a></li>
-        <li><a href="#skills">Skills</a></li>
-        <li><a href="#projects">Projects</a></li>
-        <li><a href="#contact">Contact</a></li>
-      </ul>
+
+      <div class="nav">
+        <ul class="nav-links" id="nav-links">
+          <li><a href="#about">About</a></li>
+          <li><a href="#skills">Skills</a></li>
+          <li><a href="#projects">Projects</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+      </div>
+
+      <div id="theme-toggle" class="neo-toggle" aria-label="Toggle theme">
+        <div class="neo-track">
+          <div class="neo-thumb">
+            <span class="neo-icon sun">☀</span>
+            <span class="neo-icon moon">☾</span>
+          </div>
+          <span class="neo-text day">DAY</span>
+          <span class="neo-text night">NIGHT</span>
+        </div>
+      </div>
     </nav>
 
+    <!-- =====================
+         HERO
+    ====================== -->
     <header class="hero" id="hero">
       <img src="./image/developer.jpg" alt="Developer Avatar" class="hero-img">
-      <h1><span id="prefix">Hi, I'm </span><span id="typewriter"></span></h1>
-      <!-- <p>Web Developer & Creative Coder</p> -->
+      <h1>
+        <span id="prefix">Hi, I'm </span>
+        <span id="typewriter"></span>
+      </h1>
       <a href="#projects" class="btn">View My Work</a>
     </header>
 
+    <!-- =====================
+         ABOUT
+    ====================== -->
     <section id="about">
       <h2>About Me</h2>
-      <p>I build modern, interactive web experiences with a strong focus on performance, design, and usability.</p>
+      <p>
+        I build modern, interactive web experiences with a strong focus on
+        performance, design, and usability.
+      </p>
     </section>
 
+    <!-- =====================
+         SKILLS
+    ====================== -->
     <section id="skills">
       <h2>Skills</h2>
       <div class="skill-grid">
@@ -52,7 +88,7 @@
         <span>JavaScript</span>
         <span>PHP</span>
         <span>Angular</span>
-        <span>Code Igniter</span>
+        <span>CodeIgniter</span>
         <span>Laravel</span>
         <span>React</span>
         <span>Three.js</span>
@@ -60,6 +96,9 @@
       </div>
     </section>
 
+    <!-- =====================
+         PROJECTS
+    ====================== -->
     <section id="projects">
       <h2>Projects</h2>
       <div class="projects">
@@ -67,6 +106,7 @@
           <h3>Matrix Portfolio</h3>
           <p>3D animated developer portfolio with WebGL.</p>
         </div>
+
         <div class="project-card">
           <h3>Landing Page</h3>
           <p>Modern responsive landing page design.</p>
@@ -74,13 +114,19 @@
       </div>
     </section>
 
+    <!-- =====================
+         CONTACT
+    ====================== -->
     <section class="contact" id="contact">
       <h2>Contact</h2>
       <p>Email: ortiz.jhonrhyb@gmail.com</p>
     </section>
+
   </div>
 
-  <!-- ES Module Script for Three.js -->
+  <!-- =====================
+       ES MODULE FOR THREE.JS BACKGROUND
+  ====================== -->
   <script type="module">
     import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.module.js';
 
@@ -120,7 +166,8 @@
     /* =====================
        GLITTER TEXTURE
     ===================== */
-    function createGlitterTexture() {
+    let glitterTexture;
+    function createGlitterTexture(color) {
       const size = 32;
       const c = document.createElement('canvas');
       c.width = c.height = size;
@@ -130,22 +177,21 @@
         size / 2, size / 2, 0,
         size / 2, size / 2, size / 2
       );
-      gradient.addColorStop(0, 'rgba(255,255,255,1)');
-      gradient.addColorStop(0.3, 'rgba(0,255,255,0.8)');
-      gradient.addColorStop(0.6, 'rgba(0,255,255,0.4)');
-      gradient.addColorStop(1, 'rgba(0,255,255,0)');
+      gradient.addColorStop(0, color === 'day' ? 'rgba(0,0,0,1)' : 'rgba(255,255,255,1)');
+      gradient.addColorStop(0.3, color === 'day' ? 'rgba(0,0,0,0.8)' : 'rgba(0,255,255,0.8)');
+      gradient.addColorStop(0.6, color === 'day' ? 'rgba(0,0,0,0.4)' : 'rgba(0,255,255,0.4)');
+      gradient.addColorStop(1, color === 'day' ? 'rgba(0,0,0,0)' : 'rgba(0,255,255,0)');
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, size, size);
 
       return new THREE.CanvasTexture(c);
     }
 
-    const glitterTexture = createGlitterTexture();
-
     /* =====================
        DIGIT TEXTURES
     ===================== */
-    function createDigitTextures() {
+    let digitTextures;
+    function createDigitTextures(color) {
       const textures = [];
       const size = 32;
 
@@ -156,10 +202,10 @@
 
         ctx.clearRect(0, 0, size, size);
         ctx.font = 'bold 24px "Courier New", monospace';
-        ctx.fillStyle = '#00ffdd';
+        ctx.fillStyle = color === 'day' ? '#000000' : '#00ffdd';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.shadowColor = '#00ffdd';
+        ctx.shadowColor = color === 'day' ? '#000000' : '#00ffdd';
         ctx.shadowBlur = 4;
         ctx.fillText(digit.toString(), size / 2, size / 2);
 
@@ -168,7 +214,9 @@
       return textures;
     }
 
-    const digitTextures = createDigitTextures();
+    // Initial setup for day mode
+    glitterTexture = createGlitterTexture('day');
+    digitTextures = createDigitTextures('day');
 
     /* =====================
        PARTICLES
@@ -295,6 +343,28 @@
     }
 
     /* =====================
+       THEME UPDATE
+    ===================== */
+    function updateTextures() {
+      const isDay = document.body.classList.contains('day-mode');
+      const color = isDay ? 'day' : 'night';
+
+      // Update digit textures
+      const newDigitTextures = createDigitTextures(color);
+      sprites.forEach(sprite => {
+        const digit = Math.floor(Math.random() * 10);
+        sprite.material.map = newDigitTextures[digit];
+        sprite.material.map.needsUpdate = true;
+      });
+
+      // Update glitter texture
+      atmosphere.material.map = createGlitterTexture(color);
+      atmosphere.material.map.needsUpdate = true;
+    }
+
+    window.addEventListener('themeChange', updateTextures);
+
+    /* =====================
        ANIMATION LOOP
     ===================== */
     function animate() {
@@ -370,7 +440,6 @@
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
     });
-  </script>
   </script>
   <script src="./javascript/script.js"></script>
 </body>
