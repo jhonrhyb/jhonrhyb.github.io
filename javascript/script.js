@@ -8,15 +8,90 @@ const isDesktop = () => window.innerWidth >= 768;
 ===================== */
 const themeToggle = document.getElementById('theme-toggle');
 const body = document.body;
+const heroImg = document.getElementById('hero-img'); // Select the image
 
+// Function to change the image based on the theme (night or day)
+const updateImage = () => {
+  if (body.classList.contains('night-mode')) {
+    heroImg.src = './image/developer/sleeping_image.png';  // Night mode image
+  } else {
+    heroImg.src = './image/developer/awake_image.png';  // Day mode image
+  }
+};
+
+// Function to add hover effects only when night mode is active
+const enableHoverEffects = () => {
+  if (body.classList.contains('night-mode')) {
+    heroImg.addEventListener('click', () => {
+      heroImg.src = './image/developer/awake_image.png';
+      heroImg.style.transform = 'scale(1.1)';
+      heroImg.style.opacity = '1';
+    });
+
+    heroImg.addEventListener('mouseleave', () => {
+      heroImg.src = './image/developer/sleeping_image.png';  // Night mode image
+      heroImg.style.transform = 'scale(1)';
+      heroImg.style.opacity = '1';
+    });
+
+    // Handle dragstart event to change image and style
+    heroImg.addEventListener('dragstart', (event) => {
+      // Prevent default browser drag behavior
+      event.preventDefault(); // Prevent the image from being dragged in the default way
+
+      // Change image and apply styles during the drag
+      heroImg.src = './image/developer/awake_image.png';
+      heroImg.style.transform = 'scale(1.1)';  // Apply transformation during dragging
+      heroImg.style.opacity = '0.9';  // Slightly fade the image while dragging
+
+      // Set a custom drag image (you can also use a separate image for drag if needed)
+      const dragImage = new Image();
+      dragImage.src = './image/developer/awake_image.png';  // Image for the drag ghost
+      event.dataTransfer.setDragImage(dragImage, 0, 0);  // Set custom drag image at position (0, 0)
+    });
+
+    // Handle dragend event to reset image and styles
+    heroImg.addEventListener('dragend', (event) => {
+      // Reset the image and styles after dragging ends
+      heroImg.src = './image/developer/sleeping_image.png';  // Default image in night mode
+      heroImg.style.transform = 'scale(1)';
+      heroImg.style.opacity = '1';  // Reset opacity
+    });
+  } else {
+    // Remove hover effects when not in night mode
+    heroImg.removeEventListener('mouseenter', () => { });
+    heroImg.removeEventListener('mouseleave', () => { });
+
+    // Reset styles
+    heroImg.style.transform = 'scale(1)';
+    heroImg.style.opacity = '1';
+  }
+};
+
+// Toggle the theme and apply the correct image and hover effects
 if (themeToggle) {
   themeToggle.addEventListener('click', () => {
+    // Toggle day-mode and night-mode on the body
     body.classList.toggle('day-mode');
     body.classList.toggle('night-mode');
 
-    // Notify Three.js scene to update textures
+    // Update the image based on the current mode
+    updateImage();
+
+    // Enable hover effects if night mode is active
+    enableHoverEffects();
+
+    // Optional: Notify other parts of your app (like Three.js)
     window.dispatchEvent(new Event('themeChange'));
   });
+}
+
+// Check the current mode on page load
+if (body.classList.contains('night-mode')) {
+  heroImg.src = './image/developer/sleeping_image.png';  // Night mode image
+  enableHoverEffects(); // Enable hover effects in night mode
+} else {
+  heroImg.src = './image/developer/awake_image.png';  // Day mode image
 }
 
 /* =====================
