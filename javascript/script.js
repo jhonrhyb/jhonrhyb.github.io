@@ -86,14 +86,6 @@ if (themeToggle) {
   });
 }
 
-// Check the current mode on page load
-if (body.classList.contains('night-mode')) {
-  heroImg.src = './image/developer/sleeping_image.png';  // Night mode image
-  enableHoverEffects(); // Enable hover effects in night mode
-} else {
-  heroImg.src = './image/developer/awake_image.png';  // Day mode image
-}
-
 /* =====================
    INFINITE TYPEWRITER
 ===================== */
