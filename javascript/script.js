@@ -20,49 +20,52 @@ const updateImage = () => {
 };
 
 // Function to add hover effects only when night mode is active
+// References to the event listener functions
+const onClick = () => {
+  heroImg.src = './image/developer/awake_image.png';
+  heroImg.style.transform = 'scale(1.1)';
+  heroImg.style.opacity = '1';
+};
+
+const onMouseLeave = () => {
+  heroImg.src = './image/developer/sleeping_image.png';
+  heroImg.style.transform = 'scale(1)';
+  heroImg.style.opacity = '1';
+};
+
+const onDragStart = (event) => {
+  event.preventDefault(); // Prevent default drag
+  heroImg.src = './image/developer/awake_image.png';
+  heroImg.style.transform = 'scale(1.1)';
+  heroImg.style.opacity = '0.9';
+
+  const dragImage = new Image();
+  dragImage.src = './image/developer/awake_image.png';
+  event.dataTransfer.setDragImage(dragImage, 0, 0);
+};
+
+const onDragEnd = () => {
+  heroImg.src = './image/developer/sleeping_image.png';
+  heroImg.style.transform = 'scale(1)';
+  heroImg.style.opacity = '1';
+};
+
 const enableHoverEffects = () => {
   if (body.classList.contains('night-mode')) {
-    heroImg.addEventListener('click', () => {
-      heroImg.src = './image/developer/awake_image.png';
-      heroImg.style.transform = 'scale(1.1)';
-      heroImg.style.opacity = '1';
-    });
-
-    heroImg.addEventListener('mouseleave', () => {
-      heroImg.src = './image/developer/sleeping_image.png';  // Night mode image
-      heroImg.style.transform = 'scale(1)';
-      heroImg.style.opacity = '1';
-    });
-
-    // Handle dragstart event to change image and style
-    heroImg.addEventListener('dragstart', (event) => {
-      // Prevent default browser drag behavior
-      event.preventDefault(); // Prevent the image from being dragged in the default way
-
-      // Change image and apply styles during the drag
-      heroImg.src = './image/developer/awake_image.png';
-      heroImg.style.transform = 'scale(1.1)';  // Apply transformation during dragging
-      heroImg.style.opacity = '0.9';  // Slightly fade the image while dragging
-
-      // Set a custom drag image (you can also use a separate image for drag if needed)
-      const dragImage = new Image();
-      dragImage.src = './image/developer/awake_image.png';  // Image for the drag ghost
-      event.dataTransfer.setDragImage(dragImage, 0, 0);  // Set custom drag image at position (0, 0)
-    });
-
-    // Handle dragend event to reset image and styles
-    heroImg.addEventListener('dragend', (event) => {
-      // Reset the image and styles after dragging ends
-      heroImg.src = './image/developer/sleeping_image.png';  // Default image in night mode
-      heroImg.style.transform = 'scale(1)';
-      heroImg.style.opacity = '1';  // Reset opacity
-    });
+    // Add listeners for night mode
+    heroImg.addEventListener('click', onClick);
+    heroImg.addEventListener('mouseleave', onMouseLeave);
+    heroImg.addEventListener('dragstart', onDragStart);
+    heroImg.addEventListener('dragend', onDragEnd);
   } else {
-    // Remove hover effects when not in night mode
-    heroImg.removeEventListener('mouseenter', () => { });
-    heroImg.removeEventListener('mouseleave', () => { });
+    // Remove listeners for day mode
+    heroImg.removeEventListener('click', onClick);
+    heroImg.removeEventListener('mouseleave', onMouseLeave);
+    heroImg.removeEventListener('dragstart', onDragStart);
+    heroImg.removeEventListener('dragend', onDragEnd);
 
-    // Reset styles
+    // Reset to default day mode state
+    heroImg.src = './image/developer/awake_image.png'; // Replace with actual day image
     heroImg.style.transform = 'scale(1)';
     heroImg.style.opacity = '1';
   }
