@@ -162,7 +162,7 @@ const icons = Array.from(skillGrid.children);
 
 const ICON_WIDTH = 60;
 const ICON_HEIGHT = 60;
-const GAP = isDesktop() ? 9 : 3;
+const GAP = 9;
 
 let positions = [];
 let iconMap = new Map();
@@ -170,8 +170,8 @@ let isDragging = false;
 let draggedIcon = null;
 let offsetX = 0;
 let offsetY = 0;
-
-let isHovering = false; // pause shuffle on hover
+let isHovering = false;
+let shuffleInProgress = false;
 
 // Initialize grid positions
 function setInitialPositions() {
@@ -190,7 +190,7 @@ function setInitialPositions() {
   });
 }
 
-// Dragging logic
+// Drag & drop logic
 icons.forEach(icon => {
   icon.addEventListener('mousedown', startDrag);
   icon.addEventListener('touchstart', startDrag);
@@ -226,7 +226,7 @@ function onDrag(e) {
   draggedIcon.style.top = clientY - offsetY + 'px';
 }
 
-function stopDrag(e) {
+function stopDrag() {
   if (!isDragging || !draggedIcon) return;
 
   isDragging = false;
@@ -246,14 +246,15 @@ function stopDrag(e) {
   });
 
   // Swap if needed
-  const occupiedIcon = Array.from(iconMap.entries()).find(([ic, idx]) => idx === nearestIndex)[0];
-  const currentIndex = iconMap.get(draggedIcon);
-
-  if (occupiedIcon !== draggedIcon) {
-    const currentPos = positions[currentIndex];
-    occupiedIcon.style.left = currentPos.x + 'px';
-    occupiedIcon.style.top = currentPos.y + 'px';
-    iconMap.set(occupiedIcon, currentIndex);
+  const occupiedIconEntry = Array.from(iconMap.entries()).find(([ic, idx]) => idx === nearestIndex);
+  if (occupiedIconEntry) {
+    const [occupiedIcon] = occupiedIconEntry;
+    if (occupiedIcon !== draggedIcon) {
+      const currentPos = positions[iconMap.get(draggedIcon)];
+      occupiedIcon.style.left = currentPos.x + 'px';
+      occupiedIcon.style.top = currentPos.y + 'px';
+      iconMap.set(occupiedIcon, iconMap.get(draggedIcon));
+    }
   }
 
   const targetPos = positions[nearestIndex];
@@ -263,16 +264,16 @@ function stopDrag(e) {
 
   draggedIcon = null;
 
-  // Remove event listeners
   document.removeEventListener('mousemove', onDrag);
   document.removeEventListener('mouseup', stopDrag);
   document.removeEventListener('touchmove', onDrag);
   document.removeEventListener('touchend', stopDrag);
 }
 
-// Shuffle icons every 3 seconds
-function shuffleIcons() {
-  if (isHovering) return; // skip shuffle if mouse is hovering
+// Wave shuffle with 500ms delay
+async function shuffleIconsWaveWithDelay() {
+  if (shuffleInProgress || isDragging) return;
+  shuffleInProgress = true;
 
   const shuffledIndexes = [...Array(icons.length).keys()];
   for (let i = shuffledIndexes.length - 1; i > 0; i--) {
@@ -280,47 +281,72 @@ function shuffleIcons() {
     [shuffledIndexes[i], shuffledIndexes[j]] = [shuffledIndexes[j], shuffledIndexes[i]];
   }
 
-  icons.forEach((icon, i) => {
-    const pos = positions[shuffledIndexes[i]];
-    icon.style.left = pos.x + 'px';
-    icon.style.top = pos.y + 'px';
-    iconMap.set(icon, shuffledIndexes[i]);
-  });
+  for (let i = 0; i < icons.length; i++) {
+    if (isHovering || isDragging) break;
+
+    const icon = icons[i];
+    const targetPosIndex = shuffledIndexes[i];
+
+    // Swap if another icon occupies target
+    const occupiedIconEntry = Array.from(iconMap.entries()).find(([ic, idx]) => idx === targetPosIndex);
+    if (occupiedIconEntry) {
+      const [occupiedIcon] = occupiedIconEntry;
+      const currentPos = positions[iconMap.get(icon)];
+      occupiedIcon.style.left = currentPos.x + 'px';
+      occupiedIcon.style.top = currentPos.y + 'px';
+      iconMap.set(occupiedIcon, iconMap.get(icon));
+    }
+
+    // Move the icon
+    const targetPos = positions[targetPosIndex];
+    icon.style.left = targetPos.x + 'px';
+    icon.style.top = targetPos.y + 'px';
+    iconMap.set(icon, targetPosIndex);
+
+    // Wait 500ms before next icon
+    await new Promise(resolve => setTimeout(resolve, 500));
+  }
+
+  shuffleInProgress = false;
 }
 
-// Pause shuffle on hover
-skillGrid.addEventListener('mouseenter', () => isHovering = true);
-skillGrid.addEventListener('mouseleave', () => isHovering = false);
+// Hover events
+skillGrid.addEventListener('mouseenter', () => {
+  isHovering = true;
+  shuffleIconsWaveWithDelay(); // immediate shuffle on hover
+});
 
-// Initialize
-setInitialPositions();
-setInterval(shuffleIcons, 5000);
-window.addEventListener('resize', setInitialPositions);
+skillGrid.addEventListener('mouseleave', () => {
+  isHovering = false;
+});
 
-// Select all skill icons with data-tooltip
-const skillIcons = document.querySelectorAll('#skill-grid img[data-tooltip]');
+// Auto shuffle every 5 seconds
+setInterval(() => {
+  if (!isHovering && !isDragging) shuffleIconsWaveWithDelay();
+}, 5000);
 
-// Create a floating tooltip element
+// Tooltip
 const tooltip = document.createElement('div');
 tooltip.classList.add('tooltip');
 document.body.appendChild(tooltip);
 
-// Show tooltip on hover
-skillIcons.forEach(icon => {
+icons.forEach(icon => {
   icon.addEventListener('mouseenter', () => {
     tooltip.textContent = icon.dataset.tooltip;
     tooltip.style.opacity = '1';
   });
-
   icon.addEventListener('mousemove', e => {
-    tooltip.style.left = e.clientX + 12 + 'px'; // slight offset from cursor
-    tooltip.style.top = e.clientY - 28 + 'px'; // above the cursor
+    tooltip.style.left = e.clientX + 12 + 'px';
+    tooltip.style.top = e.clientY - 28 + 'px';
   });
-
   icon.addEventListener('mouseleave', () => {
     tooltip.style.opacity = '0';
   });
 });
+
+// Initialize positions
+setInitialPositions();
+window.addEventListener('resize', setInitialPositions);
 
 /* =====================
    HAMBURGER MENU
