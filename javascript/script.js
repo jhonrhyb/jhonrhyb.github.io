@@ -90,7 +90,7 @@ if (themeToggle) {
    INFINITE TYPEWRITER
 ===================== */
 setTimeout(() => {
-  const words = ["Jhon Rhyb", "Web Developer", "UI/UX Designer"];
+  const words = ["Jhon Rhyb", "Full-Stack Developer", "UI/UX Enthusiast"];
   const el = document.getElementById("typewriter");
   const prefixEl = document.getElementById("prefix");
 
